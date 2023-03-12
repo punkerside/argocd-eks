@@ -1,0 +1,36 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: guestbook
+  labels:
+    app: guestbook
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:509472714099:certificate/94a7f42c-fb3f-4740-aa5b-12922d264efa
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http-server
+  - name: https
+    port: 443
+    targetPort: http-server
+  selector:
+    app: guestbook
+  type: LoadBalancer
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis-slave
+  labels:
+    app: redis
+    role: replica
+spec:
+  ports:
+  - port: 6379
+    targetPort: redis-server
+  selector:
+    app: redis
+    role: replica
