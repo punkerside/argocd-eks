@@ -1,10 +1,10 @@
 # GitOps - Creating deployment pipelines with ArgoCD for Amazon EKS
 
-<!-- [![Build](https://github.com/punkerside/awsday-demo/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/punkerside/awsday-demo/actions/workflows/main.yml)
-[![Open Source Helpers](https://www.codetriage.com/punkerside/awsday-demo/badges/users.svg)](https://www.codetriage.com/punkerside/awsday-demo) -->
+[![Build](https://github.com/punkerside/awsday-demo/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/punkerside/awsday-demo/actions/workflows/main.yml)
+[![Open Source Helpers](https://www.codetriage.com/punkerside/awsday-demo/badges/users.svg)](https://www.codetriage.com/punkerside/awsday-demo)
 [![GitHub Issues](https://img.shields.io/github/issues/punkerside/awsday-demo.svg)](https://github.com/punkerside/awsday-demo/issues)
-<!-- [![GitHub Tag](https://img.shields.io/github/tag-date/punkerside/awsday-demo.svg?style=plastic)](https://github.com/punkerside/awsday-demo/tags/)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/punkerside/awsday-demo) -->
+[![GitHub Tag](https://img.shields.io/github/tag-date/punkerside/awsday-demo.svg?style=plastic)](https://github.com/punkerside/awsday-demo/tags/)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/punkerside/awsday-demo)
 
 <!-- <p align="center">
   <img src="docs/img/architecture.png">
@@ -66,6 +66,7 @@ Deploy Guestbook application without SSL:
 ```bash
 # deploy guestbook
 make guestbook
+
 # capture dns
 kubectl get service --selector=app=guestbook
 ```
@@ -75,10 +76,13 @@ Deploy Guestbook application with SSL
 ```bash
 # set domain
 export DOMAIN=punkerside.io
+
 # create ssl
 make certificate
+
 # deploy guestbook
 make guestbook
+
 # create dns
 make route53
 ```
