@@ -15,6 +15,7 @@
 * [Install Terraform](https://www.terraform.io/downloads.html)
 * [Install AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
 * [Install Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+* [Install Argo CD CLI](https://argo-cd.readthedocs.io/en/stable/cli_installation/)
 
 ## **Resources**
 
@@ -25,6 +26,7 @@
 
 ### **2. Kubernetes**
 
+* [Argo CD](https://argoproj.github.io/cd)
 * [Metrics Server](https://github.com/kubernetes-sigs/metrics-server)
 * [Cluster Autoscaler (CA)](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md)
 * [Guestbook](https://kubernetes.io/docs/tutorials/stateless-application/guestbook/)
@@ -57,6 +59,12 @@ make metrics-server
 
 ```bash
 make cluster-autoscaler
+```
+
+4. Install **Argo CD**
+
+```bash
+make argocd
 ```
 
 ## **Opcional**
