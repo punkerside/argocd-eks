@@ -3,3 +3,13 @@
 .terraform.tfstate.lock.info
 terraform.tfstate
 terraform.tfstate.backup
+
+passwd
+.npm/
+node_modules/
+package-lock.json
+package.json
+.cache/
+app/music/go/
+go.sum
+run

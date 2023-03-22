@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+
+  music:
+    image: punkerside/awsday-lab:go
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    ports:
+      - "9081:9081"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    ports:
+      - "27017:27017"
+
+  movie:
+    image: punkerside/awsday-lab:python
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    ports:
+      - "5000:5000"
+
+  redis:
+    image: redis:alpine
+    deploy:
+      resources:
+        limits:
+          memory: 1024M

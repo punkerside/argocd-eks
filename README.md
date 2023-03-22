@@ -31,6 +31,13 @@
 * [Cluster Autoscaler (CA)](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md)
 * [Guestbook](https://kubernetes.io/docs/tutorials/stateless-application/guestbook/)
 
+## **Containers**
+
+| Name | Path | Runtime |
+|------|------|--------|
+| `movie` | `/movie` | python |
+| `music` | `/music` | go |
+
 ## **Variables**
 
 | Name | Description | Type | Default | Required |
@@ -41,7 +48,7 @@
 | `EKS_VERSION` | Kubernetes version | string | `1.25` | no |
 | `DOMAIN` | SSL for Guestbook | string | | no |
 
-## **Use**
+## **Base**
 
 1. Create cluster
 
@@ -69,7 +76,7 @@ make argocd
 
 ## **Opcional**
 
-Deploy Guestbook application without SSL:
+5. Deploy Guestbook application without SSL:
 
 ```bash
 # deploy guestbook
@@ -79,7 +86,7 @@ make guestbook
 kubectl get service --selector=app=guestbook
 ```
 
-Deploy Guestbook application with SSL
+6. Deploy Guestbook application with SSL
 
 ```bash
 # set domain
@@ -93,4 +100,24 @@ make guestbook
 
 # create dns
 make route53
+```
+
+## **Release**
+
+7. Create imagenes bases
+
+```bash
+make base
+```
+
+8. Compilando aplicaciones
+
+```bash
+make build
+```
+
+9. Compilando aplicaciones
+
+```bash
+make build
 ```

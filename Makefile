@@ -1,12 +1,48 @@
 SHELL:=/bin/bash
 
-PROJECT            = gitops
-ENV                = demo
+PROJECT            = awsday
+ENV                = lab
+SERVICE            = gitops
+
 EKS_VERSION        = 1.25
 AWS_DEFAULT_REGION = us-east-1
+DOCKER_UID         = $(shell id -u)
+DOCKER_GID         = $(shell id -g)
+DOCKER_USER        = $(shell whoami)
+DOCKERHUB_USER     = punkerside
 
+## container
+
+base:
+	@docker build -t ${DOCKERHUB_USER}/${PROJECT}-${ENV}:base -f docker/base/Dockerfile .
+	@docker build -t ${DOCKERHUB_USER}/${PROJECT}-${ENV}:go-build --build-arg IMG=${DOCKERHUB_USER}/${PROJECT}-${ENV}:base -f docker/go-build/Dockerfile .
+
+build:
+	@echo ''"${DOCKER_USER}"':x:'"${DOCKER_UID}"':'"${DOCKER_GID}"'::/app:/sbin/nologin' > passwd
+	@docker run --rm -u "${DOCKER_UID}":"${DOCKER_GID}" -v "${PWD}"/passwd:/etc/passwd:ro -v "${PWD}"/app/music:/app ${DOCKERHUB_USER}/${PROJECT}-${ENV}:go-build
+
+release:
+# build
+	@docker build -t ${DOCKERHUB_USER}/${PROJECT}-${ENV}:python --build-arg IMG=${DOCKERHUB_USER}/${PROJECT}-${ENV}:base -f docker/python/Dockerfile .
+	@docker build -t ${DOCKERHUB_USER}/${PROJECT}-${ENV}:go --build-arg IMG=${DOCKERHUB_USER}/${PROJECT}-${ENV}:base -f docker/go/Dockerfile .
+# login
+	echo ${DOCKERHUB_PASS} | docker login --username ${DOCKERHUB_USER} --password-stdin
+# push
+	docker push ${DOCKERHUB_USER}/${PROJECT}-${ENV}:python
+	docker push ${DOCKERHUB_USER}/${PROJECT}-${ENV}:go
+
+start:
+	@docker-compose up
+
+stop:
+	@docker-compose down
 
 ## terraform
+
+registry:
+	@cd terraform/registry/ && terraform init
+	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/registry/ && \
+	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
 
 cluster:
 	@cd terraform/cluster/ && terraform init
@@ -81,16 +117,21 @@ clean:
 	@rm -rf terraform/route53/.terraform.lock.hcl
 	@rm -rf terraform/route53/terraform.tfstate
 	@rm -rf terraform/route53/terraform.tfstate.backup
+	@rm -rf terraform/registry/.terraform/
+	@rm -rf terraform/registry/.terraform.lock.hcl
+	@rm -rf terraform/registry/terraform.tfstate
+	@rm -rf terraform/registry/terraform.tfstate.backup
 
 destroy:
-	@kubectl delete service guestbook
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/cluster/ && \
+#	@kubectl delete service guestbook
+#	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/cluster/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/certificate/ && \
+#	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/certificate/ && \
 	  terraform destroy -var="domain=${DOMAIN}" -auto-approve
 #	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/route53/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="domain=${DOMAIN}" -auto-approve
-
+	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/registry/ && \
+	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
 
 ## titan project
 
