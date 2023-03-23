@@ -2,7 +2,7 @@ version: "3.9"
 services:
 
   music:
-    image: punkerside/awsday-lab:go
+    image: ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:go
     restart: always
     deploy:
       resources:
@@ -24,7 +24,7 @@ services:
       - "27017:27017"
 
   movie:
-    image: punkerside/awsday-lab:python
+    image: ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:python
     deploy:
       resources:
         limits:

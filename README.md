@@ -121,3 +121,23 @@ make build
 ```bash
 make build
 ```
+
+## **Test**
+
+1. Microservice **Movie**
+
+```bash
+# put data
+curl -XPOST http://127.0.0.1:5000/movie?name=everest
+# get data
+curl http://127.0.0.1:5000/movie
+```
+
+2. Microservice **music**
+
+```bash
+# put data
+curl -XPOST http://127.0.0.1:9081/post?name=moby
+# get data
+curl http://127.0.0.1:9081/get
+```

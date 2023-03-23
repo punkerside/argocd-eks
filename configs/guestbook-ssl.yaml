@@ -22,18 +22,3 @@ spec:
   selector:
     app: guestbook
   type: LoadBalancer
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: redis-slave
-  labels:
-    app: redis
-    role: replica
-spec:
-  ports:
-  - port: 6379
-    targetPort: redis-server
-  selector:
-    app: redis
-    role: replica
