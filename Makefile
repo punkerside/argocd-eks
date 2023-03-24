@@ -84,7 +84,7 @@ argocd:
 
 # deleting infrastructure
 destroy:
-#	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/cluster/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
 	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/registry/ && \
@@ -94,43 +94,7 @@ destroy:
 #	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/route53/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="domain=${DOMAIN}" -auto-approve
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## terraform
-
-certificate:
-	@cd terraform/certificate/ && terraform init
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/certificate/ && \
-	  terraform apply -var="domain=${DOMAIN}" -auto-approve
-
-route53:
-	@cd terraform/certificate/ && terraform init
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/route53/ && \
-	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -var="domain=${DOMAIN}" -auto-approve
-
-
-
-
-
-
-## tools
-
+# deleting temporary files
 tmp:
 	@rm -rf terraform/*/.terraform/
 	@rm -rf terraform/*/.terraform.lock.hcl
@@ -141,3 +105,25 @@ tmp:
 	@rm -rf app/music/go.sum
 	@rm -rf app/music/run
 	@rm -rf passwd
+
+
+
+
+
+
+
+
+
+
+
+
+
+certificate:
+	@cd terraform/certificate/ && terraform init
+	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/certificate/ && \
+	  terraform apply -var="domain=${DOMAIN}" -auto-approve
+
+route53:
+	@cd terraform/certificate/ && terraform init
+	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/route53/ && \
+	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -var="domain=${DOMAIN}" -auto-approve

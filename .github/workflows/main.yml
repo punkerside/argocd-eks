@@ -1,31 +1,22 @@
-# name: Pipeline
+name: Pipeline
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 
-# env:
-#   GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+env:
+  GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
 
-# jobs:
-#   Pipeline:
-#     name: Default
-#     runs-on: ubuntu-latest
-#     timeout-minutes: 15
-#     steps:
+jobs:
+  Pipeline:
+    name: Default
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
 
-#     - name: Checkout
-#       uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
-#     - name: Reusing Workflows
-#       uses: actions/checkout@v3
-#       with:
-#         repository: punkerside/titan-bash
-#         ref: main
-#         path: .titan-bash/
-
-#     - name: Build
-#       uses: ./.titan-bash/pipelines/simple/github
-#       with:
-#         GIT_TOKEN: ${GIT_TOKEN}
+    - name: GitHub CLI
+      run: docker run -e GITHUB_TOKEN=${GIT_TOKEN} -e GITHUB_REPO=$(echo "${GITHUB_REPOSITORY}" | cut -d "/" -f2) punkerside/titan-image-gh:latest
