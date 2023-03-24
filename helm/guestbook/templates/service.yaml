@@ -1,0 +1,63 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: guestbook
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: guestbook
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http-server
+  selector:
+    app: guestbook
+  type: LoadBalancer
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis-master
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: redis
+    role: master
+spec:
+  ports:
+  - port: 6379
+    targetPort: redis-server
+  selector:
+    app: redis
+    role: master
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis-replica
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: redis
+    role: replica
+spec:
+  ports:
+  - port: 6379
+    targetPort: redis-server
+  selector:
+    app: redis
+    role: replica
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis-slave
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: redis
+    role: replica
+spec:
+  ports:
+  - port: 6379
+    targetPort: redis-server
+  selector:
+    app: redis
+    role: replica
