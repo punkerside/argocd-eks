@@ -15,9 +15,23 @@ import (
 // funcion principal
 func main() {
 
-	http.HandleFunc("/post", postBand)
-	http.HandleFunc("/get", getBand)
+	http.HandleFunc("/music", getHome)
+	http.HandleFunc("/music/post", postBand)
+	http.HandleFunc("/music/get", getBand)
 	http.ListenAndServe(":9081", nil)
+}
+
+// funcion de estado
+func getHome(w http.ResponseWriter, r *http.Request) {
+    raw := json.RawMessage(`{"api":"music","version":"v0.0.1"}`)
+    jsonResp, err := json.Marshal(&raw)
+    if err != nil {
+        panic(err)
+    }
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResp)
+	return
 }
 
 // funcion de inserción

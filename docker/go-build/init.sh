@@ -1,6 +1,6 @@
 #!/bin/bash
 
-go mod init run
+# go mod init run
 
 go get go.mongodb.org/mongo-driver/bson
 go get go.mongodb.org/mongo-driver/mongo

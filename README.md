@@ -128,8 +128,10 @@ make build
 
 ```bash
 # put data
-curl -XPOST http://127.0.0.1:5000/movie?name=everest
+curl -XPOST http://127.0.0.1:5000/movie/api?name=everest
 # get data
+curl http://127.0.0.1:5000/movie/api
+# get version
 curl http://127.0.0.1:5000/movie
 ```
 
@@ -137,7 +139,9 @@ curl http://127.0.0.1:5000/movie
 
 ```bash
 # put data
-curl -XPOST http://127.0.0.1:9081/post?name=moby
+curl -XPOST http://127.0.0.1:9081/music/post?name=moby
 # get data
-curl http://127.0.0.1:9081/get
+curl http://127.0.0.1:9081/music/get
+# get version
+curl http://127.0.0.1:9081/music
 ```

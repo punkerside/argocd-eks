@@ -1,45 +1,81 @@
 SHELL:=/bin/bash
 
-PROJECT            = awsday
-ENV                = lab
-SERVICE            = gitops
+PROJECT     = awsday
+ENV         = lab
+SERVICE     = gitops
 
-EKS_VERSION        = 1.25
-AWS_ACCOUNT        = $(shell aws sts get-caller-identity --query "Account" --output text)
-AWS_DEFAULT_REGION = us-east-1
-
-DOCKER_UID         = $(shell id -u)
-DOCKER_GID         = $(shell id -g)
-DOCKER_USER        = $(shell whoami)
+AWS_REGION  = us-east-1
+AWS_DOMAIN  = punkerside.io
+DOCKER_UID  = $(shell id -u)
+DOCKER_GID  = $(shell id -g)
+DOCKER_WHO  = $(shell whoami)
+AWS_ACCOUNT = $(shell aws sts get-caller-identity --query "Account" --output text)
+EKS_VERSION = 1.25
 
 # creating registry for containers
 registry:
 	@cd terraform/registry/ && terraform init
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/registry/ && \
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/registry/ && \
 	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
+
+# creating ssl certificates
+certificate:
+	@cd terraform/certificate/ && terraform init
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/certificate/ && \
+	  terraform apply -var="domain=${AWS_DOMAIN}" -auto-approve
 
 # create container base images
 base:
-	@docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:base -f docker/base/Dockerfile .
-	@docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:go-build --build-arg IMG=${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:base -f docker/go-build/Dockerfile .
+	docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:base -f docker/base/Dockerfile .
+	docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:go-build --build-arg IMG=${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:base -f docker/go-build/Dockerfile .
 
 # build test applications
 build:
-	@echo '${DOCKER_USER}:x:${DOCKER_UID}:${DOCKER_GID}::/app:/sbin/nologin' > passwd
-	@docker run --rm -u ${DOCKER_UID}:${DOCKER_GID} -v ${PWD}/passwd:/etc/passwd:ro -v ${PWD}/app/music:/app ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:go-build
+	@echo '${DOCKER_WHO}:x:${DOCKER_UID}:${DOCKER_GID}::/app:/sbin/nologin' > passwd
+	@docker run --rm -u ${DOCKER_UID}:${DOCKER_GID} -v ${PWD}/passwd:/etc/passwd:ro -v ${PWD}/app/music:/app ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:go-build
 
 # releasing new versions of test applications
 release:
-	@aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-	@docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:python --build-arg IMG=${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:base -f docker/python/Dockerfile .
-	@docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:go --build-arg IMG=${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:base -f docker/go/Dockerfile .
-	@docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:python
-	@docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:go
+	@aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
+	@docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:python --build-arg IMG=${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:base -f docker/python/Dockerfile .
+	@docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:go --build-arg IMG=${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:base -f docker/go/Dockerfile .
+	@docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:python
+	@docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:go
+
+# deleting infrastructure
+destroy:
+#	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/cluster/ && \
+	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/registry/ && \
+	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/certificate/ && \
+	  terraform destroy -var="domain=${AWS_DOMAIN}" -auto-approve
+#	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/route53/ && \
+	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="domain=${AWS_DOMAIN}" -auto-approve
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # starting application locally
 start:
 	@export AWS_ACCOUNT=${AWS_ACCOUNT} && \
-	  export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && \
+	  export AWS_DEFAULT_REGION=${AWS_REGION} && \
 	  export PROJECT=${PROJECT} && \
 	  export ENV=${ENV} && \
 	  export SERVICE=${SERVICE} && \
@@ -48,18 +84,43 @@ start:
 # stopping application locally
 stop:
 	@export AWS_ACCOUNT=${AWS_ACCOUNT} && \
-	  export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && \
+	  export AWS_DEFAULT_REGION=${AWS_REGION} && \
 	  export PROJECT=${PROJECT} && \
 	  export ENV=${ENV} && \
 	  export SERVICE=${SERVICE} && \
 	  docker-compose down
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # creating container cluster
 cluster:
 	@cd terraform/cluster/ && terraform init
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/cluster/ && \
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/cluster/ && \
 	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
-	@aws eks update-kubeconfig --name ${PROJECT}-${ENV}-${SERVICE} --region ${AWS_DEFAULT_REGION}
+	@aws eks update-kubeconfig --name ${PROJECT}-${ENV}-${SERVICE} --region ${AWS_REGION}
 
 # installing metrics server for containers
 metrics-server:
@@ -82,17 +143,6 @@ argocd:
 	@kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 #	@argocd login $(shell kubectl get service argocd-server -n argocd --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}') --username admin --password $(shell kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo) --insecure
 
-# deleting infrastructure
-destroy:
-	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/cluster/ && \
-	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/registry/ && \
-	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
-#	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/certificate/ && \
-	  terraform destroy -var="domain=${DOMAIN}" -auto-approve
-#	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/route53/ && \
-	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="domain=${DOMAIN}" -auto-approve
 
 # deleting temporary files
 tmp:
@@ -101,10 +151,10 @@ tmp:
 	@rm -rf terraform/*/terraform.tfstate
 	@rm -rf terraform/*/terraform.tfstate.backup
 	@rm -rf app/music/.cache
-	@rm -rf app/music/go
 	@rm -rf app/music/go.sum
 	@rm -rf app/music/run
 	@rm -rf passwd
+	@chmod 755 app/music/go/ && rm -rf app/music/go
 
 
 
@@ -118,12 +168,24 @@ tmp:
 
 
 
-certificate:
-	@cd terraform/certificate/ && terraform init
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/certificate/ && \
-	  terraform apply -var="domain=${DOMAIN}" -auto-approve
+
 
 route53:
 	@cd terraform/certificate/ && terraform init
-	@export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && cd terraform/route53/ && \
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/route53/ && \
 	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -var="domain=${DOMAIN}" -auto-approve
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
