@@ -24,6 +24,12 @@ certificate:
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/certificate/ && \
 	  terraform apply -var="domain=${AWS_DOMAIN}" -auto-approve
 
+# building codepipeline platform
+codepipeline:
+	@cd terraform/codepipeline/ && terraform init
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
+	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -var="service=${SERVICE}" -auto-approve
+
 # create container base images
 base:
 	docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:base -f docker/base/Dockerfile .
