@@ -5,3 +5,4 @@ phases:
     commands:
       - make base
       - make build
+      - make release

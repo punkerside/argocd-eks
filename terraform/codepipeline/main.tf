@@ -72,7 +72,8 @@ resource "aws_iam_role_policy" "main" {
       "Action": [
         "codebuild:BatchGetBuilds",
         "codebuild:StartBuild",
-        "sns:*"
+        "sns:*",
+        "ecr:*"
       ],
       "Resource": "*"
     },
