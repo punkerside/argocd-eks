@@ -46,10 +46,10 @@ registry:
 	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
 
 # creating container cluster
-cluster:
+eks-cluster:
 	@cd terraform/cluster/ && terraform init
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/cluster/ && \
-	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
+	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -var="eks_version=${EKS_VERSION}" -auto-approve
 	@aws eks update-kubeconfig --name ${PROJECT}-${ENV} --region ${AWS_REGION}
 
 # installing argocd in the cluster
@@ -62,6 +62,10 @@ argo-cd:
 argo-user:
 	@echo " username: admin \n password: $(shell kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d) \n dns_name: $(shell kubectl get service argocd-server -n argocd --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
 
+# adding the cluster application in argocd
+argo-cluster:
+	@kubectl apply -f argocd/cluster.yaml
+	export NAME=${PROJECT}-${ENV} VERSION=v${EKS_VERSION} && envsubst < argocd/cluster.yaml | kubectl apply -f -
 
 
 
@@ -205,7 +209,7 @@ stop:
 destroy:
 #	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 #	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/cluster/ && \
-	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
+	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -var="eks_version=${EKS_VERSION}" -auto-approve
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/registry/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
 #	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
