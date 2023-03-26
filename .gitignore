@@ -13,3 +13,6 @@ package.json
 app/golang/go/
 go.sum
 run
+
+app/python/*
+!app/python/app.py

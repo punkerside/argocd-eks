@@ -1,6 +1,6 @@
 resource "aws_ecr_repository" "main" {
-  count                = length(["movie","music"])
-  name                 = "${var.project}-${var.env}-${element(["movie","music"], count.index)}"
+  count                = length(var.services)
+  name                 = "${var.project}-${var.env}-${element(var.services, count.index)}"
   image_tag_mutability = "IMMUTABLE"
   force_delete         = true
 

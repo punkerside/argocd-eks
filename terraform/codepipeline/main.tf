@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "main" {
-  bucket        = "${var.project}-${var.env}-${var.service}"
+  bucket        = "${var.project}-${var.env}"
   acl           = "private"
   force_destroy = true
 
@@ -8,19 +8,17 @@ resource "aws_s3_bucket" "main" {
   }
 
   tags = {
-    Name    = "${var.project}-${var.env}-${var.service}"
-    Service = "${var.service}"
+    Name    = "${var.project}-${var.env}"
     Project = "${var.project}"
     Env     = "${var.env}"
   }
 }
 
 resource "aws_cloudwatch_log_group" "main" {
-  name = "${var.project}-${var.env}-${var.service}"
+  name = "${var.project}-${var.env}"
 
   tags = {
-    Name    = "${var.project}-${var.env}-${var.service}"
-    Service = "${var.service}"
+    Name    = "${var.project}-${var.env}"
     Project = "${var.project}"
     Env     = "${var.env}"
   }
@@ -112,7 +110,7 @@ resource "aws_iam_role_policy_attachment" "main" {
 }
 
 resource "aws_codepipeline" "main" {
-  name     = "${var.project}-${var.env}-${var.service}"
+  name     = "${var.project}-${var.env}"
   role_arn = aws_iam_role.main.arn
 
   artifact_store {
@@ -153,7 +151,7 @@ resource "aws_codepipeline" "main" {
       version         = "1"
 
       configuration = {
-        ProjectName = "${var.project}-${var.env}-${var.service}"
+        ProjectName = "${var.project}-${var.env}"
       }
     }
   }
@@ -170,15 +168,15 @@ resource "aws_codepipeline" "main" {
   #     version         = "1"
 
   #     configuration = {
-  #       ApplicationName = "${var.project}-${var.env}-${var.service}"
-  #       DeploymentGroupName = "${var.project}-${var.env}-${var.service}"
+  #       ApplicationName = "${var.project}-${var.env}"
+  #       DeploymentGroupName = "${var.project}-${var.env}"
   #     }
   #   }
   # }
 }
 
 resource "aws_codebuild_project" "main" {
-  name          = "${var.project}-${var.env}-${var.service}"
+  name          = "${var.project}-${var.env}"
   build_timeout = "15"
   service_role  = aws_iam_role.main.arn
 
@@ -212,8 +210,7 @@ resource "aws_codebuild_project" "main" {
   # }
 
   tags = {
-    Name    = "${var.project}-${var.env}-${var.service}"
-    Service = "${var.service}"
+    Name    = "${var.project}-${var.env}"
     Project = "${var.project}"
     Env     = "${var.env}"
   }

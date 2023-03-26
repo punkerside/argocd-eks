@@ -5,3 +5,8 @@ variable "project" {
 variable "env" {
   type = string
 }
+
+variable "services" {
+  type    = list(string)
+  default = ["golang", "python"]
+}

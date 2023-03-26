@@ -1,20 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: apistore
+  name: cluster
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    path: helm/apistore
+    path: helm/cluster
     repoURL: https://github.com/punkerside/awsday-demo
     targetRevision: HEAD
     helm:
       parameters:
-        - name: 'cert'
-          value: $CERT
+        - name: 'name'
+          value: $NAME
+        - name: 'version'
+          value: $VERSION
   destination:
     namespace: default
     server: https://kubernetes.default.svc

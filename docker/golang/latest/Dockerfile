@@ -3,5 +3,5 @@ FROM ${IMG}
 
 RUN apk add --no-cache go
 
-COPY app/music/run run
+COPY app/golang/run run
 ENTRYPOINT [ "./run" ]
