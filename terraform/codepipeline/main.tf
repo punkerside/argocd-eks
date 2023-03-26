@@ -27,7 +27,7 @@ resource "aws_cloudwatch_log_group" "main" {
 }
 
 resource "aws_iam_role" "main" {
-  name = "${var.project}-${var.env}-${var.service}"
+  name = "${var.project}-${var.env}-codepipeline"
 
   assume_role_policy = <<EOF
 {
@@ -46,7 +46,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "main" {
-  name = "${var.project}-${var.env}-${var.service}"
+  name = "${var.project}-${var.env}-codepipeline"
   role = aws_iam_role.main.id
 
   policy = <<EOF

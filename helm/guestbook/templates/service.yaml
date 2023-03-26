@@ -1,22 +1,6 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: guestbook
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: guestbook
-spec:
-  ports:
-  - name: http
-    port: 80
-    targetPort: http-server
-  selector:
-    app: guestbook
-  type: LoadBalancer
----
-kind: Service
-apiVersion: v1
-metadata:
   name: redis-master
   namespace: {{ .Values.namespace }}
   labels:
@@ -61,3 +45,29 @@ spec:
   selector:
     app: redis
     role: replica
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: guestbook
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: guestbook
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Values.cert }}
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+    service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: Name="{{ .Values.name }}"
+    service.beta.kubernetes.io/aws-load-balancer-name: {{ .Values.name }}
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http-server
+  - name: https
+    port: 443
+    targetPort: http-server
+  selector:
+    app: guestbook
+  type: LoadBalancer
