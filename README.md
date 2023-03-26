@@ -74,6 +74,12 @@ make cluster-autoscaler
 make argocd
 ```
 
+Para optener las credenciales:
+
+```bash
+echo -e " username: admin \n password: $(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d) \n dns_name: $(kubectl get service argocd-server -n argocd --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+```
+
 ## **Opcional**
 
 5. Deploy Guestbook application without SSL:

@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: guestbook
+  name: apistore
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    path: helm/guestbook
+    path: helm/apistore
     repoURL: https://github.com/punkerside/awsday-demo
     targetRevision: HEAD
     helm:

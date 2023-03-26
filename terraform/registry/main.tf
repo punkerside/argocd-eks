@@ -1,6 +1,7 @@
 resource "aws_ecr_repository" "main" {
-  name                 = "${var.project}-${var.env}-${var.service}"
-  image_tag_mutability = "MUTABLE"
+  count                = length(["movie","music"])
+  name                 = "${var.project}-${var.env}-${element(["movie","music"], count.index)}"
+  image_tag_mutability = "IMMUTABLE"
   force_delete         = true
 
   image_scanning_configuration {

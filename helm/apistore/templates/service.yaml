@@ -23,3 +23,15 @@ spec:
     - protocol: tcp
       port: 80
       targetPort: 9081
+
+
+
+
+
+
+
+
+
+
+
+

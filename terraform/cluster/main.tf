@@ -7,7 +7,7 @@ module "vpc" {
 
 module "eks" {
   source  = "punkerside/eks/aws"
-  version = "0.0.2"
+  version = "0.0.3"
 
   name               = "${var.project}-${var.env}-${var.service}"
   instance_types     = [ "r6a.large" ]
