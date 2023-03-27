@@ -31,8 +31,7 @@ codepipeline:
 # create container base images
 base:
 	@docker build -t ${PROJECT}-${ENV}:base -f docker/base/Dockerfile .
-	@docker build -t ${PROJECT}-${ENV}:golang --build-arg IMG=${PROJECT}-${ENV}:base -f docker/golang/build/Dockerfile .
-	@docker build -t ${PROJECT}-${ENV}:python --build-arg IMG=${PROJECT}-${ENV}:base -f docker/python/build/Dockerfile .
+	@docker build -t ${PROJECT}-${ENV}:${SERVICE} --build-arg IMG=${PROJECT}-${ENV}:base -f docker/${SERVICE}/build/Dockerfile .
 
 # build application
 build:
