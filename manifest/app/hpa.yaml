@@ -17,6 +17,7 @@ spec:
       target:
         type: Utilization
         averageUtilization: 85
+    cpuInitializationPeriod: 60
   - type: Resource
     resource:
       name: memory

@@ -58,7 +58,8 @@ auth:
 	@echo " username: admin \n password: $(shell kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d) \n dns_name: $(shell kubectl get service argocd-server -n argocd --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
 
 apps:
-	export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl apply -f -
+	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl apply -f -
+	kubectl apply -f manifest/gitops/main.yaml
 #	export CERT=$(shell aws acm list-certificates --query "CertificateSummaryList[*]|[?DomainName=='awsday.${AWS_DOMAIN}'].CertificateArn" --output text --region ${AWS_REGION}) && envsubst < argocd/guestbook.yaml | kubectl apply -f -
 
 
