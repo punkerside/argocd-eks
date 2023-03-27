@@ -12,7 +12,7 @@ spec:
       repoURL: https://helm.nginx.com/stable
       targetRevision: 0.16.2
     - repoURL: https://github.com/punkerside/awsday-demo
-      path: manifest/cluster
+      path: helm/cluster
       targetRevision: HEAD
       helm:
         parameters:
