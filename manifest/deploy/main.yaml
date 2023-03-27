@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: deploy
-  namespace: argocd
   annotations:
     argocd-image-updater.argoproj.io/image-list: main=$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT-$ENV-golang
-    argocd-image-updater.argoproj.io/gitops-demo-app.update-strategy: latest
-    argocd-image-updater.argoproj.io/gitops-demo-app.ignore-tags: "latest"
+    argocd-image-updater.argoproj.io/main.update-strategy: latest
+    argocd-image-updater.argoproj.io/main.ignore-tags: "latest"
+  name: deploy
+  namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:

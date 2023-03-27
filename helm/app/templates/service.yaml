@@ -1,24 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: movie
-  namespace: {{ .Values.spec.namespace }}
+  name: golang
+  namespace: default
 spec:
   selector:
-    app: movie
-  ports:
-    - protocol: tcp
-      port: 80
-      targetPort: 5000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: music
-  namespace: {{ .Values.spec.namespace }}
-spec:
-  selector:
-    app: music
+    app: golang
   ports:
     - protocol: tcp
       port: 80
