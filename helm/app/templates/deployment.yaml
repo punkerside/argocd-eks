@@ -1,66 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: movie
+  name: {{ .Values.name }}
   namespace: {{ .Values.namespace }}
   labels:
-    app: movie
+    app: {{ .Values.name }}
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: movie
+      app: {{ .Values.name }}
   template:
     metadata:
       labels:
-        app: movie
+        app: {{ .Values.name }}
     spec:
       containers:
-      - name: movie
-        image: 509472714099.dkr.ecr.us-east-1.amazonaws.com/awsday-lab-gitops:python
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 5000
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 100m
-            memory: 128Mi
-      - name: redis
-        image: redis:alpine
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 6379
-        resources:
-          requests:
-            cpu: 200m
-            memory: 1024Mi
-          limits:
-            cpu: 200m
-            memory: 1024Mi
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: music
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: music
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: music
-  template:
-    metadata:
-      labels:
-        app: music
-    spec:
-      containers:
-      - name: music
-        image: 509472714099.dkr.ecr.us-east-1.amazonaws.com/awsday-lab-gitops:go
+      - name: {{ .Values.name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
         ports:
         - containerPort: 9081
@@ -71,6 +28,25 @@ spec:
           limits:
             cpu: 100m
             memory: 128Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
       - name: mongo
         image: mongo:latest
         imagePullPolicy: Always

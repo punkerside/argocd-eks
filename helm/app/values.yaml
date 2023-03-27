@@ -1,0 +1,6 @@
+name: api
+namespace: default
+image:
+  repository: punkerside/noroot
+  tag: latest
+  pullPolicy: IfNotPresent
