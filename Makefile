@@ -85,16 +85,6 @@ apps:
 
 
 
-
-
-
-# adding the cluster application in argocd
-argo-cluster:
-	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < argocd/cluster.yaml | kubectl apply -f -
-
-argo-app:
-	@export CERT=$(shell aws acm list-certificates --query "CertificateSummaryList[*]|[?DomainName=='awsday.${AWS_DOMAIN}'].CertificateArn" --output text --region ${AWS_REGION}) && envsubst < argocd/guestbook.yaml | kubectl apply -f -
-
 # starting application locally
 start:
 	@export AWS_ACCOUNT=${AWS_ACCOUNT} && \
