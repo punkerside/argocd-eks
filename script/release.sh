@@ -9,9 +9,6 @@ then
   exit 0
 fi
 
-echo "TAG_RELEASE=$TAG_RELEASE"
-echo "TAG_IMMUTABLE=$TAG_IMMUTABLE"
-
 aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
 docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:${TAG_RELEASE} --build-arg IMG=${PROJECT}-${ENV}:base -f docker/${SERVICE}/latest/Dockerfile .
 docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:${TAG_RELEASE}
