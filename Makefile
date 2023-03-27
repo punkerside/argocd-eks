@@ -37,7 +37,7 @@ base:
 # build application
 build:
 	@echo '${DOCKER_USER}:x:${DOCKER_UID}:${DOCKER_GID}::/app:/sbin/nologin' > passwd
-	@docker run --rm -u ${DOCKER_UID}:${DOCKER_GID} -v ${PWD}/passwd:/etc/passwd:ro -v ${PWD}/app/${SERVICE}:/app ${PROJECT}-${ENV}:${SERVICE}
+	docker run --rm -u ${DOCKER_UID}:${DOCKER_GID} -v ${PWD}/passwd:/etc/passwd:ro -v ${PWD}/app/${SERVICE}:/app ${PROJECT}-${ENV}:${SERVICE}
 
 # releasing new version of application
 release:

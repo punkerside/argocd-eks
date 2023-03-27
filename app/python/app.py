@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/movie', methods=['GET'])
 def home():
-    return {"api":"movie","version":"v0.0.3"}
+    return {"api":"movie","version":"v0.0.4"}
 
 @app.route('/movie/api', methods=['GET'])
 def get():
@@ -17,7 +17,7 @@ def get():
 
 @app.route('/movie/api', methods=['POST'])
 def post():
-    r = redis.StrictRedis(host='redis', port=6379, decode_responses=True)
+    r = redis.StrictRedis(host='redis.default.svc.cluster.local', port=6379, decode_responses=True)
     name = request.args.get('name', type = str)
     r.set(name, "id")
     return 'agregando pelicula: ' + name
