@@ -4,5 +4,5 @@ phases:
   build:
     commands:
       - make base
-      - make build
-      - make release
+      - make build SERVICE=${SERVICE}
+      - make release SERVICE=${SERVICE}

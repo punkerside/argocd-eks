@@ -109,8 +109,51 @@ resource "aws_iam_role_policy_attachment" "main" {
   role       = aws_iam_role.main.name
 }
 
+resource "aws_codebuild_project" "main" {
+  count         = length(var.services)
+  name          = "${var.project}-${var.env}-${element(var.services, count.index)}"
+  build_timeout = "15"
+  service_role  = aws_iam_role.main.arn
+
+  artifacts {
+    type     = "S3"
+    location = aws_s3_bucket.main.id
+  }
+
+  environment {
+    compute_type    = "BUILD_GENERAL1_SMALL"
+    image           = "aws/codebuild/amazonlinux2-x86_64-standard:4.0"
+    type            = "LINUX_CONTAINER"
+    privileged_mode = true
+
+    environment_variable {
+      name  = "SERVICE"
+      value = element(var.services, count.index)
+    }
+  }
+
+  source {
+    type      = "NO_SOURCE"
+    buildspec = file("buildspec.yml")
+  }
+
+  logs_config {
+    cloudwatch_logs {
+      group_name  = aws_cloudwatch_log_group.main.name
+    }
+  }
+
+  tags = {
+    Name    = "${var.project}-${var.env}-${element(var.services, count.index)}"
+    Service = element(var.services, count.index)
+    Project = "${var.project}"
+    Env     = "${var.env}"
+  }
+}
+
 resource "aws_codepipeline" "main" {
-  name     = "${var.project}-${var.env}"
+  count    = length(var.services)
+  name     = "${var.project}-${var.env}-${element(var.services, count.index)}"
   role_arn = aws_iam_role.main.arn
 
   artifact_store {
@@ -151,67 +194,8 @@ resource "aws_codepipeline" "main" {
       version         = "1"
 
       configuration = {
-        ProjectName = "${var.project}-${var.env}"
+        ProjectName = "${var.project}-${var.env}-${element(var.services, count.index)}"
       }
     }
-  }
-
-  # stage {
-  #   name = "Deploy"
-
-  #   action {
-  #     name            = "Deploy"
-  #     category        = "Deploy"
-  #     owner           = "AWS"
-  #     provider        = "CodeDeploy"
-  #     input_artifacts = ["build_output"]
-  #     version         = "1"
-
-  #     configuration = {
-  #       ApplicationName = "${var.project}-${var.env}"
-  #       DeploymentGroupName = "${var.project}-${var.env}"
-  #     }
-  #   }
-  # }
-}
-
-resource "aws_codebuild_project" "main" {
-  name          = "${var.project}-${var.env}"
-  build_timeout = "15"
-  service_role  = aws_iam_role.main.arn
-
-  artifacts {
-    type     = "S3"
-    location = aws_s3_bucket.main.id
-  }
-
-  environment {
-    compute_type    = "BUILD_GENERAL1_SMALL"
-    image           = "aws/codebuild/amazonlinux2-x86_64-standard:4.0"
-    type            = "LINUX_CONTAINER"
-    privileged_mode = true
-  }
-
-  source {
-    type      = "NO_SOURCE"
-    buildspec = file("buildspec.yml")
-  }
-
-  logs_config {
-    cloudwatch_logs {
-      group_name  = aws_cloudwatch_log_group.main.name
-    }
-  }
-
-  # vpc_config {
-  #   vpc_id             = data.aws_vpc.main.id
-  #   subnets            = data.aws_subnets.main.ids
-  #   security_group_ids = [data.aws_security_group.main.id]
-  # }
-
-  tags = {
-    Name    = "${var.project}-${var.env}"
-    Project = "${var.project}"
-    Env     = "${var.env}"
   }
 }
