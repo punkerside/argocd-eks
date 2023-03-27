@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: python
-        image: 509472714099.dkr.ecr.us-east-1.amazonaws.com/awsday-lab-python:v0.0.4
+        image: 509472714099.dkr.ecr.us-east-1.amazonaws.com/awsday-lab-python:v0.0.5
         imagePullPolicy: Always
         ports:
         - containerPort: 5000

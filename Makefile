@@ -37,7 +37,7 @@ base:
 # build application
 build:
 	@echo '${DOCKER_USER}:x:${DOCKER_UID}:${DOCKER_GID}::/app:/sbin/nologin' > passwd
-	docker run --rm -u ${DOCKER_UID}:${DOCKER_GID} -v ${PWD}/passwd:/etc/passwd:ro -v ${PWD}/app/${SERVICE}:/app ${PROJECT}-${ENV}:${SERVICE}
+	@docker run --rm -u ${DOCKER_UID}:${DOCKER_GID} -v ${PWD}/passwd:/etc/passwd:ro -v ${PWD}/app/${SERVICE}:/app ${PROJECT}-${ENV}:${SERVICE}
 
 # releasing new version of application
 release:
@@ -59,8 +59,7 @@ auth:
 
 apps:
 	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl apply -f -
-	kubectl apply -f manifest/gitops/main.yaml
-#	export CERT=$(shell aws acm list-certificates --query "CertificateSummaryList[*]|[?DomainName=='awsday.${AWS_DOMAIN}'].CertificateArn" --output text --region ${AWS_REGION}) && envsubst < argocd/guestbook.yaml | kubectl apply -f -
+	@kubectl apply -f manifest/gitops/main.yaml
 
 
 
