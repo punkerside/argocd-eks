@@ -39,7 +39,7 @@ spec:
             memory: 1024Mi
           limits:
             cpu: 200m
-            memory: 1024M
+            memory: 1024Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
