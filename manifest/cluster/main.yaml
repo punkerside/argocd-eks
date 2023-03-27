@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - chart: nginx-ingress
+      repoURL: https://helm.nginx.com/stable
+      targetRevision: 0.16.2
+    - repoURL: https://github.com/punkerside/awsday-demo
+      path: manifest/cluster
+      targetRevision: HEAD
+      helm:
+        parameters:
+          - name: 'name'
+            value: $NAME
+          - name: 'version'
+            value: $VERSION
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+      allowEmpty: true
