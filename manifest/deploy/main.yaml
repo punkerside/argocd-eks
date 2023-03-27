@@ -3,6 +3,10 @@ kind: Application
 metadata:
   name: deploy
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: main=$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT-$ENV-golang
+    argocd-image-updater.argoproj.io/gitops-demo-app.update-strategy: latest
+    argocd-image-updater.argoproj.io/gitops-demo-app.ignore-tags: "latest"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -11,10 +15,6 @@ spec:
     path: helm/app/
     repoURL: https://github.com/punkerside/awsday-demo
     targetRevision: HEAD
-    helm:
-      parameters:
-        - name: 'name'
-          value: $NAME
   destination:
     namespace: default
     server: https://kubernetes.default.svc
