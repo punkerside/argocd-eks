@@ -28,18 +28,6 @@ spec:
           limits:
             cpu: 100m
             memory: 128Mi
-      - name: redis
-        image: redis:alpine
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 6379
-        resources:
-          requests:
-            cpu: 200m
-            memory: 1024Mi
-          limits:
-            cpu: 200m
-            memory: 1024Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
