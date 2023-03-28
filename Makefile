@@ -1,9 +1,7 @@
 PROJECT     = awsday
 ENV         = lab
 
-DOCKER_UID  = $(shell id -u)
-DOCKER_GID  = $(shell id -g)
-DOCKER_USER = $(shell whoami)
+
 
 AWS_REGION  = us-east-1
 AWS_ACCOUNT = $(shell aws sts get-caller-identity --query "Account" --output text)
@@ -29,21 +27,20 @@ codepipeline:
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
 	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
 
-# create container base images
-base:
-	@export PROJECT=${PROJECT} && export ENV=${ENV} && export AWS_ACCOUNT=${AWS_ACCOUNT} && export AWS_REGION=${AWS_REGION} && ${PWD}/script/base.sh
-
-# build application
-build:
-	@echo '${DOCKER_USER}:x:${DOCKER_UID}:${DOCKER_GID}::/app:/sbin/nologin' > passwd
-	@docker run --rm -u ${DOCKER_UID}:${DOCKER_GID} -v ${PWD}/passwd:/etc/passwd:ro -v ${PWD}/app/${SERVICE}:/app ${PROJECT}-${ENV}:${SERVICE}
-
 # releasing new version of application
-release:
-	$(eval TAG_RELEASE = $(shell cat app/${SERVICE}/app.* | grep version | cut -d'"' -f8))
-	@aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
-	@docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:${TAG_RELEASE} --build-arg IMG=${PROJECT}-${ENV}:base -f docker/${SERVICE}/latest/Dockerfile .
-	@docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:${TAG_RELEASE}
+build:
+	@export PROJECT=${PROJECT} && export ENV=${ENV} && export SERVICE=${SERVICE} && export AWS_ACCOUNT=${AWS_ACCOUNT} && export AWS_REGION=${AWS_REGION} && ${PWD}/script/build.sh
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -92,10 +89,10 @@ apps:
 
 # deleting infrastructure
 destroy:
-	@export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl delete -f -
-	@kubectl delete -f manifest/gitops/main.yaml
-	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl delete -f -
-	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+#	@export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl delete -f -
+#	@kubectl delete -f manifest/gitops/main.yaml
+#	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl delete -f -
+#	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/registry/ && \
