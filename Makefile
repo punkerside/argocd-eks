@@ -31,9 +31,7 @@ codepipeline:
 
 # create container base images
 base:
-	@export PROJECT=${PROJECT} && export ENV=${ENV} && export AWS_ACCOUNT=${AWS_ACCOUNT} && export AWS_REGION=${AWS_REGION} && ${PWD}/script/immutable.sh
-	@docker build -t ${PROJECT}-${ENV}:base -f docker/base/Dockerfile .
-	@docker build -t ${PROJECT}-${ENV}:${SERVICE} --build-arg IMG=${PROJECT}-${ENV}:base -f docker/${SERVICE}/build/Dockerfile .
+	@export PROJECT=${PROJECT} && export ENV=${ENV} && export AWS_ACCOUNT=${AWS_ACCOUNT} && export AWS_REGION=${AWS_REGION} && ${PWD}/script/base.sh
 
 # build application
 build:

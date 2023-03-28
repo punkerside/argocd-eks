@@ -8,3 +8,6 @@ then
   echo "the image tag $TAG_RELEASE already exists in the $PROJECT-$ENV-$SERVICE repository"
   exit 0
 fi
+
+docker build -t $PROJECT-$ENV:base -f docker/base/Dockerfile .
+docker build -t $PROJECT-$ENV:$SERVICE --build-arg IMG=$PROJECT-$ENV:base -f docker/$SERVICE/build/Dockerfile .
