@@ -31,35 +31,21 @@ codepipeline:
 
 # create container base images
 base:
-ifndef SERVICE
-$(error SERVICE is not set)
-endif
 	@docker build -t ${PROJECT}-${ENV}:base -f docker/base/Dockerfile .
 	@docker build -t ${PROJECT}-${ENV}:${SERVICE} --build-arg IMG=${PROJECT}-${ENV}:base -f docker/${SERVICE}/build/Dockerfile .
 
 # build application
 build:
-ifndef SERVICE
-$(error SERVICE is not set)
-endif
 	@echo '${DOCKER_USER}:x:${DOCKER_UID}:${DOCKER_GID}::/app:/sbin/nologin' > passwd
 	@docker run --rm -u ${DOCKER_UID}:${DOCKER_GID} -v ${PWD}/passwd:/etc/passwd:ro -v ${PWD}/app/${SERVICE}:/app ${PROJECT}-${ENV}:${SERVICE}
 
 # releasing new version of application
 release:
-ifndef SERVICE
-$(error SERVICE is not set)
-endif
 	@export PROJECT=${PROJECT} && \
 	export ENV=${ENV} && \
 	export AWS_ACCOUNT=${AWS_ACCOUNT} && \
 	export AWS_REGION=${AWS_REGION} && \
 	${PWD}/script/release.sh
-
-
-
-
-
 
 
 
