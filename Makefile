@@ -31,6 +31,7 @@ codepipeline:
 
 # create container base images
 base:
+	@export PROJECT=${PROJECT} && export ENV=${ENV} && export AWS_ACCOUNT=${AWS_ACCOUNT} && export AWS_REGION=${AWS_REGION} && ${PWD}/script/immutable.sh
 	@docker build -t ${PROJECT}-${ENV}:base -f docker/base/Dockerfile .
 	@docker build -t ${PROJECT}-${ENV}:${SERVICE} --build-arg IMG=${PROJECT}-${ENV}:base -f docker/${SERVICE}/build/Dockerfile .
 
@@ -41,14 +42,10 @@ build:
 
 # releasing new version of application
 release:
-	@export PROJECT=${PROJECT} && \
-	export ENV=${ENV} && \
-	export AWS_ACCOUNT=${AWS_ACCOUNT} && \
-	export AWS_REGION=${AWS_REGION} && \
-	${PWD}/script/release.sh
-
-
-
+	$(eval TAG_RELEASE = $(shell cat app/${SERVICE}/app.* | grep version | cut -d'"' -f8))
+	@aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
+	@docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:${TAG_RELEASE} --build-arg IMG=${PROJECT}-${ENV}:base -f docker/${SERVICE}/latest/Dockerfile .
+	@docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:${TAG_RELEASE}
 
 
 
