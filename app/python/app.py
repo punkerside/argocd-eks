@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/movie', methods=['GET'])
 def home():
-    return {"api":"movie","version":"v0.0.5"}
+    return {"api":"movie","version":"v0.0.6"}
 
 @app.route('/movie/api', methods=['GET'])
 def get():
