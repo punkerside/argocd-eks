@@ -1,8 +1,6 @@
 PROJECT     = awsday
 ENV         = lab
 
-
-
 AWS_REGION  = us-east-1
 AWS_ACCOUNT = $(shell aws sts get-caller-identity --query "Account" --output text)
 EKS_VERSION = 1.25
@@ -93,11 +91,11 @@ destroy:
 #	@kubectl delete -f manifest/gitops/main.yaml
 #	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl delete -f -
 #	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
+#	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/registry/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
-	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/cluster/ && \
+#	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/cluster/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="eks_version=${EKS_VERSION}" -auto-approve
 
 # deleting temporary files
