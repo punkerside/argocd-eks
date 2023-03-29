@@ -29,23 +29,6 @@ codepipeline:
 build:
 	@export PROJECT=${PROJECT} && export ENV=${ENV} && export SERVICE=${SERVICE} && export AWS_ACCOUNT=${AWS_ACCOUNT} && export AWS_REGION=${AWS_REGION} && ${PWD}/script/build.sh
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # installing argocd in the cluster
 argocd:
 	@kubectl create namespace argocd
@@ -55,13 +38,36 @@ argocd:
 	@kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/manifests/install.yaml
 
 # getting argocd credentials
-username:
+creds:
 	@echo " username: admin \n password: $(shell kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d) \n dns_name: $(shell kubectl get service argocd-server -n argocd --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
 
 deploy:
 	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl apply -f -
 	@kubectl apply -f manifest/gitops/main.yaml
 	@export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl apply -f -
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # deleting infrastructure
 destroy:
@@ -89,19 +95,3 @@ tmp:
 	@rm -rf app/golang/run
 	@rm -rf passwd
 	@chmod 755 -R app/golang/go/ && rm -rf app/golang/go
-
-# starting application locally
-start:
-	@export AWS_ACCOUNT=${AWS_ACCOUNT} && \
-	  export AWS_DEFAULT_REGION=${AWS_REGION} && \
-	  export PROJECT=${PROJECT} && \
-	  export ENV=${ENV} && \
-	  docker-compose up
-
-# stopping application locally
-stop:
-	@export AWS_ACCOUNT=${AWS_ACCOUNT} && \
-	  export AWS_DEFAULT_REGION=${AWS_REGION} && \
-	  export PROJECT=${PROJECT} && \
-	  export ENV=${ENV} && \
-	  docker-compose down
