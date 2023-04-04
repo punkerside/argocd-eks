@@ -6,8 +6,11 @@ metadata:
     argocd-image-updater.argoproj.io/main.update-strategy: latest
     argocd-image-updater.argoproj.io/main.ignore-tags: "latest"
     argocd-image-updater.argoproj.io/main.pull-secret: pullsecret:argocd/pullsecret
-  name: deploy
+  name: music
   namespace: argocd
+  labels:
+    code: golang
+    trigger: image
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:

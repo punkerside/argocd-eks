@@ -3,14 +3,14 @@ kind: Application
 metadata:
   name: cluster
   namespace: argocd
+  labels:
+    code: yaml
+    trigger: gitops
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - chart: nginx-ingress
-      repoURL: https://helm.nginx.com/stable
-      targetRevision: 0.16.2
     - repoURL: https://github.com/punkerside/awsday-demo
       path: helm/cluster
       targetRevision: HEAD

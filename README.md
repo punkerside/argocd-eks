@@ -151,3 +151,6 @@ curl http://golang.default.svc.cluster.local/music/get
 # get version
 curl http://golang.default.svc.cluster.local/music
 ```
+
+
+kubectl run -ti --image=alpine sh

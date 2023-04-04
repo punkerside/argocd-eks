@@ -1,8 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: gitops
+  name: movie
   namespace: argocd
+  labels:
+    code: python
+    trigger: gitops
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:

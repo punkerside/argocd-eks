@@ -62,26 +62,6 @@ destroy:
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/cluster/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="eks_version=${EKS_VERSION}" -auto-approve
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # deleting temporary files
 tmp:
 	@rm -rf terraform/*/.terraform/
