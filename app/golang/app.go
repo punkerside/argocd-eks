@@ -23,7 +23,7 @@ func main() {
 
 // funcion de estado
 func getHome(w http.ResponseWriter, r *http.Request) {
-    raw := json.RawMessage(`{"api":"music","version":"v0.0.8"}`)
+    raw := json.RawMessage(`{"api":"music","version":"v0.0.9"}`)
     jsonResp, err := json.Marshal(&raw)
     if err != nil {
         panic(err)

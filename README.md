@@ -6,16 +6,15 @@
 [![GitHub Tag](https://img.shields.io/github/tag-date/punkerside/awsday-demo.svg?style=plastic)](https://github.com/punkerside/awsday-demo/tags/)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/punkerside/awsday-demo)
 
-<!-- <p align="center">
-  <img src="docs/img/architecture.png">
-</p> -->
+<p align="center">
+  <img src="docs/architecture.png">
+</p>
 
 ## **Prerequisites**
 
 * [Install Terraform](https://www.terraform.io/downloads.html)
 * [Install AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
 * [Install Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
-* [Install Argo CD CLI](https://argo-cd.readthedocs.io/en/stable/cli_installation/)
 
 ## **Resources**
 
@@ -29,14 +28,14 @@
 * [Argo CD](https://argoproj.github.io/cd)
 * [Metrics Server](https://github.com/kubernetes-sigs/metrics-server)
 * [Cluster Autoscaler (CA)](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md)
-* [Guestbook](https://kubernetes.io/docs/tutorials/stateless-application/guestbook/)
 
-## **Containers**
+## **Applications**
 
-| Name | Path | Runtime |
-|------|------|--------|
-| `movie` | `/movie` | python |
-| `music` | `/music` | go |
+| Name | Path | Runtime | Trigger |
+|------|------|---------|---------|
+| `cluster` | | yaml | gitops |
+| `movie` | `/movie` | python | gitops |
+| `music` | `/music` | golang | image |
 
 ## **Variables**
 
@@ -44,93 +43,51 @@
 |------|-------------|------|---------|----------|
 | `PROJECT` | Project's name | string | `gitops` | no |
 | `ENV` | Environment Name | string | `demo` | no |
-| `AWS_DEFAULT_REGION` | Amazon AWS Region | string | `us-east-1` | no |
+| `AWS_REGION` | Amazon AWS Region | string | `us-east-1` | no |
 | `EKS_VERSION` | Kubernetes version | string | `1.25` | no |
-| `DOMAIN` | SSL for Guestbook | string | | no |
 
-## **Base**
+## **Usage**
 
-1. Create cluster
+1. Create Cluster
 
 ```bash
 make cluster
 ```
 
-2. Install **Metrics Server**
+2. Create Repositories
 
 ```bash
-make metrics-server
+make registry
 ```
 
-3. Install **Cluster Autoscaler**
+3. Create CodePipeline
 
 ```bash
-make cluster-autoscaler
+make codepipeline
 ```
 
-4. Install **Argo CD**
+4. Install ArgoCD
 
 ```bash
 make argocd
 ```
 
-Para optener las credenciales:
+5. Deploy Apps
 
 ```bash
-echo -e " username: admin \n password: $(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d) \n dns_name: $(kubectl get service argocd-server -n argocd --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+make apps
 ```
 
-## **Opcional**
+6. Testing Apps
 
-5. Deploy Guestbook application without SSL:
+- Creating container for tests
 
 ```bash
-# deploy guestbook
-make guestbook
-
-# capture dns
-kubectl get service --selector=app=guestbook
+kubectl run -i --tty test --image=alpine -- sh
+# apk add curl
 ```
 
-6. Deploy Guestbook application with SSL
-
-```bash
-# set domain
-export DOMAIN=punkerside.io
-
-# create ssl
-make certificate
-
-# deploy guestbook
-make guestbook
-
-# create dns
-make route53
-```
-
-## **Release**
-
-7. Create imagenes bases
-
-```bash
-make base
-```
-
-8. Compilando aplicaciones
-
-```bash
-make build
-```
-
-9. Compilando aplicaciones
-
-```bash
-make build
-```
-
-## **Test**
-
-1. Microservice **Movie**
+- Testing the Movie microservice
 
 ```bash
 # put data
@@ -141,7 +98,7 @@ curl http://python.default.svc.cluster.local/movie/api
 curl http://python.default.svc.cluster.local/movie
 ```
 
-2. Microservice **music**
+- Testing the Music microservice
 
 ```bash
 # put data
@@ -151,6 +108,3 @@ curl http://golang.default.svc.cluster.local/music/get
 # get version
 curl http://golang.default.svc.cluster.local/music
 ```
-
-
-kubectl run -ti --image=alpine sh
