@@ -25,10 +25,6 @@ codepipeline:
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
 	  terraform apply -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
 
-# releasing new version of application
-build:
-	@export PROJECT=${PROJECT} && export ENV=${ENV} && export SERVICE=${SERVICE} && export AWS_ACCOUNT=${AWS_ACCOUNT} && export AWS_REGION=${AWS_REGION} && ${PWD}/script/build.sh
-
 # installing argocd in the cluster
 argocd:
 	@kubectl create namespace argocd
@@ -36,51 +32,55 @@ argocd:
 	@kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 	@kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
 	@kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/manifests/install.yaml
+	@echo "esperando creacion del balanceador" && sleep 20s
+	@make initial
 
-# getting argocd credentials
-creds:
+# getting argocd startup credentials
+initial:
 	@echo " username: admin \n password: $(shell kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d) \n dns_name: $(shell kubectl get service argocd-server -n argocd --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
 
-deploy:
+# deploying argocd applications
+apps:
 	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl apply -f -
 	@kubectl apply -f manifest/gitops/main.yaml
 	@export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl apply -f -
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# releasing new version of application
+release:
+	@export PROJECT=${PROJECT} && export ENV=${ENV} && export SERVICE=${SERVICE} && export AWS_ACCOUNT=${AWS_ACCOUNT} && export AWS_REGION=${AWS_REGION} && ${PWD}/script/release.sh
 
 # deleting infrastructure
 destroy:
-#	@export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl delete -f -
-#	@kubectl delete -f manifest/gitops/main.yaml
-#	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl delete -f -
-#	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-#	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
+	@export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl delete -f -
+	@kubectl delete -f manifest/gitops/main.yaml
+	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl delete -f -
+	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/registry/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
-#	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/cluster/ && \
+	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/cluster/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -var="eks_version=${EKS_VERSION}" -auto-approve
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # deleting temporary files
 tmp:
@@ -94,4 +94,4 @@ tmp:
 	@rm -rf app/golang/go.sum
 	@rm -rf app/golang/run
 	@rm -rf passwd
-	@chmod 755 -R app/golang/go/ && rm -rf app/golang/go
+#	@chmod 755 -R app/golang/go/ && rm -rf app/golang/go

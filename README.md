@@ -134,20 +134,20 @@ make build
 
 ```bash
 # put data
-curl -XPOST http://127.0.0.1:5000/movie/api?name=everest
+curl -XPOST http://python.default.svc.cluster.local/movie/api?name=everest
 # get data
-curl http://127.0.0.1:5000/movie/api
+curl http://python.default.svc.cluster.local/movie/api
 # get version
-curl http://127.0.0.1:5000/movie
+curl http://python.default.svc.cluster.local/movie
 ```
 
 2. Microservice **music**
 
 ```bash
 # put data
-curl -XPOST http://127.0.0.1:9081/music/post?name=moby
+curl -XPOST http://golang.default.svc.cluster.local/music/post?name=moby
 # get data
-curl http://127.0.0.1:9081/music/get
+curl http://golang.default.svc.cluster.local/music/get
 # get version
-curl http://127.0.0.1:9081/music
+curl http://golang.default.svc.cluster.local/music
 ```
