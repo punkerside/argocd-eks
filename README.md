@@ -72,6 +72,12 @@ make codepipeline
 make argocd
 ```
 
+- Capture logs of the Image Updater functionality
+
+```bash
+kubectl -n argocd logs -f --selector app.kubernetes.io/name=argocd-image-updater
+```
+
 5. Deploy Apps
 
 ```bash
