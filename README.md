@@ -31,11 +31,11 @@
 
 ## **Applications**
 
-| Name | Path | Runtime | Trigger |
-|------|------|---------|---------|
-| `cluster` | | yaml | gitops |
-| `movie` | `/movie` | python | gitops |
-| `music` | `/music` | golang | image |
+| Name | Path | Route | Runtime | Trigger |
+|------|------|-------|---------|---------|
+| `cluster` | `helm/cluster/` | | yaml | gitops |
+| `movie` | `app/python/`, `manifest/app/` | `/movie` | python | gitops |
+| `music` | `app/golang/` | `/music` | golang | image |
 
 ## **Variables**
 
@@ -48,52 +48,54 @@
 
 ## **Usage**
 
-1. Create Cluster
+1. Create VPC and EKS cluster.
 
 ```bash
 make cluster
 ```
 
-2. Create Repositories
+2. Create repositories for containers.
 
 ```bash
 make registry
 ```
 
-3. Create CodePipeline
+3. Create CI pipelines with AWS CodePipeline.
 
 ```bash
 make codepipeline
 ```
 
-4. Install ArgoCD
+4. Installing ArgoCD on the EKS cluster.
 
 ```bash
 make argocd
 ```
 
-- Capture logs of the Image Updater functionality
+- Capture logs of the Image Updater functionality.
 
 ```bash
 kubectl -n argocd logs -f --selector app.kubernetes.io/name=argocd-image-updater
 ```
+kubectl -n argocd logs -f --selector app.kubernetes.io/name=argocd-application-controller
 
-5. Deploy Apps
+
+5. Deploying demo applications in EKS cluster with ArgoCD.
 
 ```bash
 make apps
 ```
 
-6. Testing Apps
+6. Running tests against demo applications.
 
 - Creating container for tests
 
 ```bash
-kubectl run -i --tty test --image=alpine -- sh
+kubectl run -i --tty bash --image=alpine -- sh
 # apk add curl
 ```
 
-- Testing the Movie microservice
+- Movie microservice.
 
 ```bash
 # put data
@@ -104,7 +106,7 @@ curl http://python.default.svc.cluster.local/movie/api
 curl http://python.default.svc.cluster.local/movie
 ```
 
-- Testing the Music microservice
+- Music microservice.
 
 ```bash
 # put data
@@ -114,3 +116,7 @@ curl http://golang.default.svc.cluster.local/music/get
 # get version
 curl http://golang.default.svc.cluster.local/music
 ```
+
+## **Author**
+
+The demo is maintained by [Ivan Echegaray](https://github.com/punkerside)
