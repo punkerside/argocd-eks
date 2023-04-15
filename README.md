@@ -77,8 +77,10 @@ make argocd
 ```bash
 kubectl -n argocd logs -f --selector app.kubernetes.io/name=argocd-image-updater
 ```
-kubectl -n argocd logs -f --selector app.kubernetes.io/name=argocd-application-controller
 
+```bash
+kubectl -n argocd logs -f --selector app.kubernetes.io/name=argocd-application-controller
+```
 
 5. Deploying demo applications in EKS cluster with ArgoCD.
 
