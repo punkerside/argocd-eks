@@ -1,4 +1,4 @@
-# ArgoCD - Infrastructure
+# Basic Infrastructure
 
 ## **Variables**
 
