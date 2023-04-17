@@ -11,7 +11,7 @@
 
 ## **Usage**
 
-1. Create VPC and EKS cluster.
+1. Create **VPC** and **EKS cluster**.
 
 ```bash
 make cluster
@@ -23,31 +23,31 @@ make cluster
 make registry
 ```
 
-3. Create CI pipelines with AWS CodePipeline.
+3. Create CI pipelines with **AWS CodePipeline**.
 
 ```bash
 make codepipeline
 ```
 
-4. Installing ArgoCD on the EKS cluster.
+4. Installing **ArgoCD** on the **EKS cluster**.
 
 ```bash
 make argocd
 ```
 
-- Capture logs of the ArgoCD Controller.
+- Capture logs of the **ArgoCD Controller**.
 
 ```bash
 kubectl -n argocd logs -f --selector app.kubernetes.io/name=argocd-application-controller
 ```
 
-- Capture logs of the Image Updater functionality.
+- Capture logs of the **Image Updater** functionality.
 
 ```bash
 kubectl -n argocd logs -f --selector app.kubernetes.io/name=argocd-image-updater
 ```
 
-5. Deploying demo applications in EKS cluster with ArgoCD.
+5. Deploying demo applications in **EKS cluster** with **ArgoCD**.
 
 ```bash
 make apps
