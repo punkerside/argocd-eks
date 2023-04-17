@@ -51,9 +51,9 @@ release:
 
 # deleting infrastructure
 destroy:
-	@export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl delete -f -
-	@kubectl delete -f manifest/gitops/main.yaml
-	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/cluster/main.yaml | kubectl delete -f -
+	@export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < argo/updater.yaml | kubectl delete -f -
+	@kubectl delete -f argo/gitops.yaml
+	@export NAME=${PROJECT}-${ENV} VERSION=v$(shell curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep $(EKS_VERSION) | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < argo/cluster.yaml | kubectl delete -f -
 	@kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 	@export AWS_DEFAULT_REGION=${AWS_REGION} && cd terraform/codepipeline/ && \
 	  terraform destroy -var="project=${PROJECT}" -var="env=${ENV}" -auto-approve
