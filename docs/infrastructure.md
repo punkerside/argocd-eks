@@ -1,11 +1,5 @@
 # ArgoCD - Infrastructure
 
-## **Application**
-
-| App Manifest | Argo Manifest | App Language | Argo Trigger |
-|--------------|---------------|--------------|--------------|
-| `helm/cluster/` | `argo/cluster.yaml` | `yaml` | `gitops` |
-
 ## **Variables**
 
 | Name | Description | Type | Default | Required |
