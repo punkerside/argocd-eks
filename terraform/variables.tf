@@ -1,8 +1,8 @@
-variable "project" {
+variable "name" {
   type = string
 }
 
-variable "env" {
+variable "eks_version" {
   type = string
 }
 
