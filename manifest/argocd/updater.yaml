@@ -9,8 +9,8 @@ metadata:
   name: music
   namespace: argocd
   labels:
-    code: golang
-    trigger: image
+    runtime: golang
+    trigger: updater
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:

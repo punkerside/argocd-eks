@@ -4,7 +4,8 @@ metadata:
   name: cluster
   namespace: argocd
   labels:
-    code: yaml
+    runtime: yaml
+    tool: helmm
     trigger: gitops
   finalizers:
     - resources-finalizer.argocd.argoproj.io

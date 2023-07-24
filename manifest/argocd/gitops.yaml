@@ -4,15 +4,16 @@ metadata:
   name: movie
   namespace: argocd
   labels:
-    code: python
+    runtime: python
+    tool: kustomize
     trigger: gitops
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    path: manifest/app
-    repoURL: https://github.com/punkerside/awsday-demo
+    path: manifest/kubectl/app
+    repoURL: https://github.com/punkerside/argocd-demo
     targetRevision: HEAD
   destination:
     namespace: default

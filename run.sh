@@ -86,11 +86,11 @@ argocd () {
 }
 
 apps () {
-    # instalando aplicacion para administrar cluster con gitops
-    export NAME=${PROJECT}-${ENV} VERSION=v$(curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep ${EKS_VERSION} | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/argocd/cluster.yaml | kubectl apply -f -
+    # # instalando aplicacion para administrar cluster con gitops
+    # export NAME=${PROJECT}-${ENV} VERSION=v$(curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep ${EKS_VERSION} | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/argocd/cluster.yaml | kubectl apply -f -
 
-    # # instalando aplicacion demo administrada por gitops
-    # kubectl apply -f manifest/gitops/main.yaml
+    # instalando aplicacion demo administrada por gitops
+    kubectl apply -f manifest/argocd/gitops.yaml
 
     #  # instalando aplicacion demo administrada por image-updater
     # export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl apply -f -
