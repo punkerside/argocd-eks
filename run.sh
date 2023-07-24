@@ -93,7 +93,7 @@ apps () {
     # kubectl apply -f manifest/argocd/gitops.yaml
 
      # instalando aplicacion demo administrada por image-updater
-    export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl apply -f -
+    export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && envsubst < manifest/argocd/updater.yaml | kubectl apply -f -
 }
 
 "$@"
