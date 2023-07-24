@@ -1,4 +1,4 @@
 image:
-  repository: 509472714099.dkr.ecr.us-east-1.amazonaws.com/awsday-lab-golang
+  repository: 509472714099.dkr.ecr.us-east-1.amazonaws.com/argocd-lab-golang
   tag: v0.0.1
   pullPolicy: IfNotPresent
