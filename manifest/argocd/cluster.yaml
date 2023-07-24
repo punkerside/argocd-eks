@@ -11,8 +11,8 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://github.com/punkerside/awsday-demo
-      path: helm/cluster
+    - repoURL: https://github.com/punkerside/argocd-demo
+      path: manifest/helm/cluster
       targetRevision: HEAD
       helm:
         parameters:

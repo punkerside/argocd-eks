@@ -10,7 +10,7 @@ ECR_TOKEN=$(aws ecr --region=${AWS_DEFAULT_REGION} get-authorization-token --out
 
 base () {
     export DOCKER_BUILDKIT=0
-    docker build -t ${PROJECT}-${ENV}:base -f docker/base/Dockerfile .
+    docker build -t ${PROJECT}-${ENV}:base -f docker/Dockerfile.base .
 }
 
 cluster () {
@@ -25,11 +25,21 @@ cluster () {
 	aws eks update-kubeconfig --name ${PROJECT}-${ENV} --region ${AWS_DEFAULT_REGION}
 }
 
+destroy () {
+    # destruyendo cluster
+    export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+	cd terraform/ && terraform destroy -var="name=${PROJECT}-${ENV}" -var="eks_version=${EKS_VERSION}" -auto-approve
+
+    # actualizando kubeconfig
+	aws eks update-kubeconfig --name ${PROJECT}-${ENV} --region ${AWS_DEFAULT_REGION}
+}
+
 build () {
     SERVICE=$1
+    base
 
     export DOCKER_BUILDKIT=0
-    docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:latest --build-arg IMG=${PROJECT}-${ENV}:base -f docker/${SERVICE}/Dockerfile .
+    docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:latest --build-arg IMG=${PROJECT}-${ENV}:base -f docker/Dockerfile.${SERVICE} .
 }
 
 release () {
@@ -40,22 +50,50 @@ release () {
     # validando ultima version publicada
     if [ "${TAG_IMMUTABLE}" = "${TAG_RELEASE}" ]
     then
-      echo "the image tag ${TAG_RELEASE} already exists in the ${PROJECT}-${ENV}-${SERVICE} repository"
+      echo -ne "\e[43m[WARNING]\e[0m The image tag ${TAG_IMMUTABLE} already exists in the argocd-lab-${SERVICE} repository \e[0m\n"
       exit 0
     fi
 
     # publicando nueva version
     aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
 
+    # etiquetando imagen
+    docker tag ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:latest ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:${TAG_RELEASE}
+
+    # publicando imagen
+    docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:latest
+    docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${PROJECT}-${ENV}-${SERVICE}:${TAG_RELEASE}
 }
 
-destroy () {
-    # destruyendo cluster
-    export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-	cd terraform/ && terraform destroy -var="name=${PROJECT}-${ENV}" -var="eks_version=${EKS_VERSION}" -auto-approve
+argocd () {
+    # preparando cluster
+    kubectl create namespace argocd
+    kubectl create -n argocd secret docker-registry pullsecret --docker-username=AWS --docker-password=${ECR_TOKEN} --docker-server="https://${AWS_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
 
-    # actualizando kubeconfig
-	aws eks update-kubeconfig --name ${PROJECT}-${ENV} --region ${AWS_DEFAULT_REGION}
+    # instalando
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/manifests/install.yaml
+
+    # esperando al servicio
+    sleep 30s
+
+    # capturando credenciales
+    echo -e "\n username: admin \n password: $(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d) \n dns_name: $(kubectl get service argocd-server -n argocd --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}')\n"
+
+    # configurando argocd
+    kubectl apply -n argocd -f manifest/kubectl/argocd/argocd-cm.yaml
+}
+
+apps () {
+    # instalando aplicacion para administrar cluster con gitops
+    export NAME=${PROJECT}-${ENV} VERSION=v$(curl -s https://api.github.com/repos/kubernetes/autoscaler/releases | grep tag_name | grep cluster-autoscaler | grep ${EKS_VERSION} | cut -d '"' -f4 | cut -d "-" -f3 | head -1) && envsubst < manifest/argocd/cluster.yaml | kubectl apply -f -
+
+    # # instalando aplicacion demo administrada por gitops
+    # kubectl apply -f manifest/gitops/main.yaml
+
+    #  # instalando aplicacion demo administrada por image-updater
+    # export NAME=golang PROJECT=${PROJECT} ENV=${ENV} AWS_ACCOUNT=${AWS_ACCOUNT} AWS_REGION=${AWS_REGION} && envsubst < manifest/deploy/main.yaml | kubectl apply -f -
 }
 
 "$@"

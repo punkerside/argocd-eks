@@ -1,16 +1,8 @@
-PROJECT     = argocd
-ENV         = lab
+# cluster:
+# 	@./run.sh cluster
 
-export AWS_DEFAULT_REGION = us-east-1
-AWS_ACCOUNT               = $(shell aws sts get-caller-identity --query "Account" --output text)
-EKS_VERSION               = 1.27
-ECR_TOKEN                 = $(shell aws ecr --region=${AWS_DEFAULT_REGION} get-authorization-token --output text --query authorizationData[].authorizationToken | base64 -d | cut -d: -f2)
-
-# creating container cluster
-cluster:
-	@cd terraform/ && terraform init
-	@cd terraform/ && terraform apply -var="name=${PROJECT}-${ENV}" -var="eks_version=${EKS_VERSION}" -auto-approve
-	@aws eks update-kubeconfig --name ${PROJECT}-${ENV} --region ${AWS_DEFAULT_REGION}
+# build:
+# 	@./run.sh build
 
 
 
@@ -30,15 +22,19 @@ cluster:
 
 
 
+# PROJECT     = argocd
+# ENV         = lab
 
+# export AWS_DEFAULT_REGION = us-east-1
+# AWS_ACCOUNT               = $(shell aws sts get-caller-identity --query "Account" --output text)
+# EKS_VERSION               = 1.27
+# ECR_TOKEN                 = $(shell aws ecr --region=${AWS_DEFAULT_REGION} get-authorization-token --output text --query authorizationData[].authorizationToken | base64 -d | cut -d: -f2)
 
-
-
-
-
-
-
-
+# # creating container cluster
+# cluster:
+# 	@cd terraform/ && terraform init
+# 	@cd terraform/ && terraform apply -var="name=${PROJECT}-${ENV}" -var="eks_version=${EKS_VERSION}" -auto-approve
+# 	@aws eks update-kubeconfig --name ${PROJECT}-${ENV} --region ${AWS_DEFAULT_REGION}
 
 # # creating registry for containers
 # registry:
